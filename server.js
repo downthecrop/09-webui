@@ -4,20 +4,21 @@ const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 const mysql = require('mysql2');
 const path = require('path');
-const cors = require('cors');  // Import cors package
+const cors = require('cors');
+const rateLimit = require('express-rate-limit');
+
 const app = express();
 const port = 3000;
 
 const JWT_SECRET = 'your_jwt_secret_key';
-const PLAYER_SAVE_PATH = "C:\\Users\\Anon\\IdeaProjects\\2009scape\\Server\\data\\players";
+const PLAYER_SAVE_PATH = 'your_path';
 
-// Database connection setup
 const db = mysql.createConnection({
-    host: '127.0.0.1',           // database_address
-    port: 3306,                  // database_port
-    user: 'root',                // database_username
-    password: '',                // database_password
-    database: 'global',          // database_name
+    host: '127.0.0.1',
+    port: 3306,
+    user: 'root',
+    password: '',
+    database: 'global',
 });
 
 // Connect to MySQL database
@@ -29,10 +30,21 @@ db.connect((err) => {
     console.log('Connected to MySQL database.');
 });
 
-app.use(cors());  // Enable CORS
+app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname)));
 
+// Apply rate limiting middleware
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,  // 15 minutes
+    max: 100,                  // limit each IP to 100 requests per windowMs
+    message: "Too many requests from this IP, please try again after 15 minutes",
+});
+
+// Apply rate limiter to all API requests
+app.use('/api/', apiLimiter);
+
+// Routes
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
 
@@ -100,12 +112,12 @@ app.put('/api/update-password', async (req, res) => {
     });
 });
 
-// Serve the index.html file for all non-API requests
+
+// This can be removed, testing we are hosting a login form
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Start the server
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
