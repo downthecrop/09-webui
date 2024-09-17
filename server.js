@@ -46,7 +46,10 @@ app.use('/api/', apiLimiter);
 
 // Routes
 app.post('/api/login', async (req, res) => {
-    const { username, password } = req.body;
+    let { username, password } = req.body;
+
+    // Replace spaces with underscores in the username for consistency
+    username = username.replace(/\s+/g, '_');
 
     const query = `SELECT * FROM members WHERE username = ?`;
     db.query(query, [username], async (err, results) => {
@@ -65,7 +68,7 @@ app.post('/api/login', async (req, res) => {
             return res.status(400).json({ message: 'Invalid credentials.' });
         }
 
-        // Add username to the token payload
+        // Add username to the token payload (keeping the space-to-underscore format)
         const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '1h' });
         res.status(200).json({ token, message: 'Login successful.' });
     });
@@ -80,9 +83,12 @@ app.get('/api/download-save', (req, res) => {
 
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
-        const username = decoded.username;
+        let username = decoded.username;
 
-        // Construct the file path using the username
+        // Replace spaces with underscores in the username
+        username = username.replace(/\s+/g, '_');
+
+        // Construct the file path using the username with underscores
         const filePath = path.join(PLAYER_SAVE_PATH, `${username}.json`);
         
         console.log('Attempting to download file from:', filePath);
@@ -100,7 +106,11 @@ app.get('/api/download-save', (req, res) => {
 });
 
 app.put('/api/update-password', async (req, res) => {
-    const { username, newPassword } = req.body;
+    let { username, newPassword } = req.body;
+    
+    // Replace spaces with underscores in the username
+    username = username.replace(/\s+/g, '_');
+
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     const query = `UPDATE members SET password = ? WHERE username = ?`;
@@ -111,7 +121,6 @@ app.put('/api/update-password', async (req, res) => {
         res.status(200).json({ message: 'Password updated successfully.' });
     });
 });
-
 
 // This can be removed, testing we are hosting a login form
 app.get('/', (req, res) => {
