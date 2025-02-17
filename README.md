@@ -4,7 +4,10 @@
 This Node.js application allows users to log in, update their passwords, and download their player save files. Built with Express, MySQL, JWT-based authentication, and includes rate-limiting for security.
 
 
-![Demo Video](https://img.youtube.com/vi/0KWHOa4tDZg/maxresdefault.jpg)(https://youtu.be/0KWHOa4tDZg)
+<a href="https://youtu.be/0KWHOa4tDZg" target="_blank" rel="noopener noreferrer">
+    <img src="https://img.youtube.com/vi/0KWHOa4tDZg/maxresdefault.jpg" alt="Demo Video">
+    <p>Demo Video</p>
+</a>
 
 ## Features
 
